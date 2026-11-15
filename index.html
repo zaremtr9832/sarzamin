@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مأموریت نجات سرزمین کسرها | رقابت زنده کلاسی</title>
+<meta name="description" content="بازی رقابتی تقسیم کسرها برای کلاس ششم. طراح و توسعه‌دهنده: سمیه زارع">
+<meta name="theme-color" content="#6C5CE7">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root{
+  --blue:#4A90E2; --sky:#74C0FC; --purple:#6C5CE7; --violet:#A29BFE;
+  --teal:#00CEC9; --green:#20C997; --yellow:#FFD43B; --orange:#FF922B;
+  --red:#FF6B6B; --pink:#FD79A8; --dark:#2D3436;
+  --shadow-md:0 6px 20px rgba(45,52,54,.12);
+  --shadow-lg:0 12px 40px rgba(45,52,54,.18);
+  --radius:20px; --font:'Vazirmatn','Tahoma',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:var(--font); background:linear-gradient(135deg,#667eea,#764ba2 50%,#f093fb);
+  background-attachment:fixed; min-height:100vh; color:var(--dark);
+  overflow-x:hidden; line-height:1.7;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(circle at 20% 20%,rgba(255,212,59,.25),transparent 40%),
+             radial-gradient(circle at 80% 70%,rgba(0,206,201,.2),transparent 45%);
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px;border-radius:10px}
+button:disabled{opacity:.45;cursor:not-allowed}
+h1,h2,h3{line-height:1.3;font-weight:800}
+.screen{display:none;min-height:100vh;padding:14px}
+.screen.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes confettiFall{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* ══════════════ عبارت ریاضی چپ‌به‌راست ══════════════
+   کلید اصلی: این کلاس با direction:ltr و unicode-bidi:isolate
+   تضمین می‌کند عبارت ریاضی از چپ به راست خوانده شود،
+   حتی وقتی داخل متن راست‌چین فارسی قرار دارد.
+*/
+.math{
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  vertical-align: middle;
+  background: linear-gradient(135deg, #fff3bf, #ffe066);
+  padding: 5px 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(255,146,43,.3);
+  font-weight: 900;
+  margin: 0 4px;
+  white-space: nowrap;
+}
+.math.small{ font-size: 0.85em; padding: 3px 8px; gap: 4px; }
+.math.big{ font-size: 1.2em; padding: 8px 16px; }
+
+/* کسر */
+.frac{
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  line-height: 1;
+  margin: 0 2px;
+}
+.frac .n{
+  border-bottom: 2.5px solid currentColor;
+  padding: 0 6px 1px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.frac .d{
+  padding: 1px 6px 0;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+/* ══════════════ صفحه شروع ══════════════ */
+#startScreen{display:none;text-align:center;padding-top:30px}
+#startScreen.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.mascot{font-size:5rem;animation:float 3s ease-in-out infinite;display:inline-block;filter:drop-shadow(0 8px 20px rgba(0,0,0,.3))}
+.title{
+  font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;margin:8px 0 6px;
+  background:linear-gradient(135deg,#FFD43B,#FF922B,#FD79A8);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 0 rgba(108,92,231,.4));
+}
+.subtitle{color:#fff;font-size:clamp(.95rem,2.5vw,1.15rem);font-weight:600;margin-bottom:24px;opacity:.95;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+.start-info{
+  background:rgba(255,255,255,.97);border-radius:16px;padding:16px 20px;max-width:520px;
+  margin:0 auto 20px;box-shadow:var(--shadow-md);font-size:.9rem;color:#444;text-align:right;
+}
+.start-info b{color:var(--purple)}
+.start-info ul{padding-right:20px;margin-top:6px}
+.start-info li{margin:4px 0;line-height:1.8}
+.btn-start{
+  background:linear-gradient(135deg,#FFD43B,#FF922B);color:#5a2d00;font-weight:900;
+  font-size:1.2rem;padding:18px 40px;border-radius:18px;
+  box-shadow:0 6px 0 #c76a00,0 10px 24px rgba(255,146,43,.5);
+  transition:all .2s;margin-top:8px;
+}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 0 #c76a00,0 14px 30px rgba(255,146,43,.6)}
+.btn-start:active{transform:translateY(4px);box-shadow:0 2px 0 #c76a00}
+.creator-tag{color:#fff;font-size:.85rem;margin-top:24px;opacity:.9;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+
+/* ══════════════ هدر ══════════════ */
+.top-bar{
+  background:#fff;border-radius:14px;padding:10px 16px;margin-bottom:12px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+  box-shadow:var(--shadow-md);max-width:1200px;margin-left:auto;margin-right:auto;
+}
+.top-bar h2{font-size:1rem;color:var(--purple)}
+.top-bar .badge{background:var(--green);color:#fff;padding:4px 12px;border-radius:8px;font-size:.78rem;font-weight:800}
+.top-bar .ctrl{display:flex;gap:6px}
+.icon-btn{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f0f3ff,#e8ecff);display:grid;place-items:center;font-size:1.1rem;transition:all .2s}
+.icon-btn:hover{transform:scale(1.08);background:var(--violet);color:#fff}
+.icon-btn.muted{opacity:.5}
+
+/* ══════════════ پنل اصلی ══════════════ */
+.main-wrap{max-width:1200px;margin:0 auto;display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:950px){.main-wrap{grid-template-columns:1.5fr 1fr}}
+.panel{background:#fff;border-radius:16px;padding:18px;box-shadow:var(--shadow-md)}
+.q-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.q-badge{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;padding:6px 14px;border-radius:10px;font-size:.85rem;font-weight:800}
+.q-type{background:#f0f3ff;color:var(--purple);padding:6px 12px;border-radius:10px;font-size:.8rem;font-weight:800}
+
+/* متن سؤال — فارسی راست‌چین، عبارت‌های ریاضی درونش LTR */
+.q-text{
+  font-size:clamp(1.05rem,2.8vw,1.3rem);
+  font-weight:800;
+  color:var(--dark);
+  margin-bottom:16px;
+  line-height:2.2;
+  text-align:right;
+  direction:rtl;
+}
+
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:500px){.q-opts{grid-template-columns:1fr}}
+.q-opt{
+  background:linear-gradient(135deg,#f8f9ff,#eef1ff);border:3px solid #e0e5ff;
+  border-radius:14px;padding:14px;font-weight:800;font-size:1.05rem;min-height:64px;
+  display:flex;align-items:center;justify-content:center;transition:all .3s;
+  text-align:center;cursor:pointer;color:var(--dark);flex-wrap:wrap;gap:6px;
+}
+.q-opt:hover:not(.locked){border-color:var(--violet);background:linear-gradient(135deg,#eef1ff,#e0e5ff);transform:translateY(-2px)}
+.q-opt.correct{background:linear-gradient(135deg,#d3f9d8,#b2f2bb);border-color:var(--green);color:#1a7431;animation:pop .4s}
+.q-opt.wrong{background:linear-gradient(135deg,#ffe3e3,#ffc9c9);border-color:var(--red);color:#a61e1e}
+.q-opt.picked{border-color:var(--purple);background:linear-gradient(135deg,#e0e5ff,#d0d8ff)}
+
+.explain{
+  background:linear-gradient(135deg,#fff3bf,#ffe066);border-radius:12px;padding:14px;
+  font-weight:700;color:#5a3800;margin-top:12px;border-right:5px solid var(--orange);
+  display:none;animation:fadeIn .3s;font-size:.95rem;line-height:2.2;text-align:right;
+}
+.explain.show{display:block}
+.explain .math{ background:rgba(255,255,255,.7); }
+
+/* تایمر */
+.timer-box{
+  background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;
+  border-radius:16px;padding:16px;text-align:center;margin-bottom:12px;
+  box-shadow:var(--shadow-md);
+}
+.timer-label{font-size:.85rem;opacity:.9;margin-bottom:4px}
+.timer-num{font-size:clamp(2.5rem,8vw,4rem);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;transition:color .3s}
+.timer-num.warn{color:var(--yellow)}
+.timer-num.danger{color:var(--red);animation:pulse .6s infinite}
+.timer-bar{height:12px;background:rgba(0,0,0,.25);border-radius:99px;overflow:hidden;margin-top:10px}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--teal));border-radius:99px;transition:width .15s linear,background .3s;width:100%}
+.timer-fill.warn{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.timer-fill.danger{background:linear-gradient(90deg,var(--orange),var(--red))}
+
+/* دکمه‌ها */
+.ctrl-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+@media(max-width:500px){.ctrl-btns{grid-template-columns:1fr}}
+.btn{
+  font-weight:800;font-size:.95rem;padding:14px;border-radius:12px;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,#4A90E2,#74C0FC);color:#fff;box-shadow:0 4px 0 #2e6da8}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #2e6da8}
+.btn-success{background:linear-gradient(135deg,#20C997,#00CEC9);color:#fff;box-shadow:0 4px 0 #0a8f6c}
+.btn-success:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #0a8f6c}
+.btn-warning{background:linear-gradient(135deg,#FFD43B,#FF922B);color:#5a2d00;box-shadow:0 4px 0 #c76a00}
+.btn-warning:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #c76a00}
+.btn-danger{background:linear-gradient(135deg,#FF6B6B,#FD79A8);color:#fff;box-shadow:0 4px 0 #c92a2a}
+.btn-danger:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #c92a2a}
+.btn-neutral{background:linear-gradient(135deg,#f0f3ff,#e8ecff);color:var(--purple);box-shadow:0 4px 0 #c8d0e8}
+.btn-neutral:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #c8d0e8}
+
+/* گروه‌ها */
+.groups-title{color:var(--purple);margin-bottom:10px;font-size:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.groups-title small{color:#888;font-weight:600;font-size:.75rem}
+.group-card{
+  display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
+  padding:10px 12px;border-radius:12px;background:#f8f9ff;margin-bottom:8px;
+  border-right:5px solid;transition:all .2s;
+}
+.group-card.correct{background:linear-gradient(135deg,#d3f9d8,#b2f2bb);border-right-color:var(--green)!important}
+.group-card.wrong{background:linear-gradient(135deg,#ffe3e3,#ffc9c9);border-right-color:var(--red)!important}
+.group-emoji{font-size:1.4rem}
+.group-name{font-weight:800;font-size:.9rem;color:var(--dark);line-height:1.3}
+.group-actions{display:flex;gap:4px}
+.mini-btn{
+  width:34px;height:34px;border-radius:8px;font-size:1rem;font-weight:900;
+  display:grid;place-items:center;transition:all .15s;color:#fff;
+}
+.mini-btn:active{transform:scale(.9)}
+.mini-btn:disabled{opacity:.3;cursor:not-allowed}
+.mini-ok{background:var(--green)}
+.mini-no{background:var(--red)}
+.mini-skip{background:#999;font-size:.72rem}
+.group-score{
+  font-weight:900;color:var(--purple);font-size:1rem;
+  background:#fff;padding:4px 10px;border-radius:8px;min-width:50px;text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* لیدربورد */
+.lb-box{background:linear-gradient(135deg,#fff3bf,#ffe066);border-radius:14px;padding:12px;margin-top:12px}
+.lb-title{font-weight:900;color:#5a3800;margin-bottom:8px;font-size:.9rem;display:flex;justify-content:space-between}
+.lb-row{
+  display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;
+  font-weight:800;font-size:.9rem;margin-bottom:5px;background:rgba(255,255,255,.6);
+  transition:all .3s;
+}
+.lb-row.top{background:#fff;box-shadow:var(--shadow-md);transform:scale(1.02);border-right:4px solid var(--orange)}
+.lb-row .lb-pos{color:#946200;margin-left:6px}
+.lb-row .lb-name{flex:1}
+.lb-row .lb-score{color:var(--purple);font-variant-numeric:tabular-nums}
+
+/* نتایج */
+.result-card{
+  background:#fff;border-radius:var(--radius);padding:30px 22px;text-align:center;
+  max-width:640px;margin:20px auto;box-shadow:var(--shadow-lg);animation:pop .5s;
+}
+.result-emoji{font-size:5rem;animation:float 2s ease-in-out infinite;display:inline-block}
+.result-title{
+  font-size:clamp(1.4rem,4vw,2rem);font-weight:900;margin:10px 0;
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.result-msg{color:#666;font-weight:700;margin-bottom:20px;font-size:.95rem}
+.winner-box{
+  background:linear-gradient(135deg,#20C997,#00CEC9);color:#fff;border-radius:16px;
+  padding:16px;margin:12px 0;box-shadow:var(--shadow-md);
+}
+.winner-box .wname{font-size:1.4rem;font-weight:900;margin-bottom:4px}
+.winner-box .wscore{font-size:2rem;font-weight:900;font-variant-numeric:tabular-nums}
+.result-btns{display:grid;gap:10px;margin-top:20px}
+
+/* کانفتی */
+.confetti{
+  position:fixed;width:10px;height:10px;border-radius:2px;z-index:9999;
+  pointer-events:none;animation:confettiFall linear forwards;
+}
+
+/* مودال */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:16px;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:#fff;border-radius:18px;padding:24px;max-width:480px;width:100%;
+  box-shadow:var(--shadow-lg);animation:pop .3s;max-height:85vh;overflow-y:auto;
+}
+.modal h2{color:var(--purple);margin-bottom:14px;font-size:1.15rem}
+.modal .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
+.modal .row:last-child{border-bottom:none}
+.modal .row label{font-weight:700;font-size:.9rem}
+.close-btn{
+  float:left;width:34px;height:34px;border-radius:10px;background:#f0f3ff;
+  display:grid;place-items:center;font-size:1.1rem;font-weight:900;
+}
+.close-btn:hover{background:var(--red);color:#fff}
+.switch{position:relative;width:48px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider{
+  position:absolute;inset:0;background:#ccc;border-radius:99px;
+  transition:all .25s;cursor:pointer;
+}
+.slider:before{
+  content:"";position:absolute;height:20px;width:20px;right:3px;top:3px;
+  background:#fff;border-radius:50%;transition:all .25s;
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
+.switch input:checked + .slider{background:var(--green)}
+.switch input:checked + .slider:before{transform:translateX(-22px)}
+select{ padding:6px 10px;border-radius:8px;border:2px solid #e0e5ff;font-family:inherit;font-weight:700;background:#fff;color:var(--dark);font-size:.9rem; }
+select:focus{outline:none;border-color:var(--purple)}
+input[type=range]{accent-color:var(--purple);width:110px}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);
+  background:var(--dark);color:#fff;padding:11px 22px;border-radius:12px;
+  font-weight:700;z-index:300;transition:transform .35s;font-size:.9rem;
+  max-width:90vw;text-align:center;box-shadow:var(--shadow-lg);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Combo */
+.combo{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:2rem;font-weight:900;color:var(--yellow);
+  text-shadow:0 4px 24px rgba(255,146,43,.9);z-index:150;
+  pointer-events:none;text-align:center;
+}
+.combo.show{animation:comboAnim 1.1s ease}
+@keyframes comboAnim{
+  0%{transform:translate(-50%,-50%) scale(0) rotate(-15deg);opacity:0}
+  30%{transform:translate(-50%,-50%) scale(1.3) rotate(5deg);opacity:1}
+  70%{transform:translate(-50%,-50%) scale(1.1);opacity:1}
+  100%{transform:translate(-50%,-70%) scale(1);opacity:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ صفحه شروع ============ -->
+<section id="startScreen" class="screen active">
+  <div class="mascot">🏰✨</div>
+  <h1 class="title">مأموریت نجات سرزمین کسرها</h1>
+  <p class="subtitle">رقابت زنده کلاسی — پایه ششم ابتدایی</p>
+  <div class="start-info">
+    <b>🎯 نحوه اجرا در کلاس:</b>
+    <ul>
+      <li>📽️ این صفحه روی پروژکتور نمایش داده می‌شود.</li>
+      <li>👨‍🏫 معلم سؤال را می‌خواند و تایمر را شروع می‌کند.</li>
+      <li>🙋 دانش‌آموزان هر گروه پاسخ می‌دهند.</li>
+      <li>✅ معلم پاسخ هر گروه را در پنل ثبت می‌کند.</li>
+      <li>🏆 در پایان، گروه برنده مشخص می‌شود.</li>
+    </ul>
+  </div>
+  <button class="btn-start" id="btnStart">🚀 شروع مأموریت</button>
+  <p class="creator-tag">طراحی و توسعه: سمیه زارع</p>
+</section>
+
+<!-- ============ پنل بازی ============ -->
+<section id="gameScreen" class="screen">
+  <div class="top-bar">
+    <h2>🖥️ پنل معلم — مأموریت سرزمین کسرها</h2>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span class="badge" id="qCount">۰ / ۸</span>
+      <div class="ctrl">
+        <button class="icon-btn" id="btnMusic" title="موسیقی">🎵</button>
+        <button class="icon-btn" id="btnSfx" title="افکت صوتی">🔊</button>
+        <button class="icon-btn" id="btnSettings" title="تنظیمات">⚙️</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="panel">
+      <div class="q-header">
+        <span class="q-badge" id="qBadge">سؤال ۱ از ۸</span>
+        <span class="q-type" id="qType">هم‌مخرج</span>
+      </div>
+      <div class="q-text" id="qText">برای شروع، روی «شروع مأموریت» کلیک کنید.</div>
+      <div class="q-opts" id="qOpts"></div>
+
+      <div class="timer-box">
+        <div class="timer-label">⏱️ زمان باقی‌مانده</div>
+        <div class="timer-num" id="timerNum">۳۰</div>
+        <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+      </div>
+
+      <div class="explain" id="explainBox"></div>
+
+      <div class="ctrl-btns">
+        <button class="btn btn-primary" id="btnTimer">▶️ شروع زمان</button>
+        <button class="btn btn-success" id="btnReveal">✅ اعلام پاسخ صحیح</button>
+        <button class="btn btn-warning" id="btnNext">➡️ سؤال بعدی</button>
+        <button class="btn btn-danger" id="btnReset">🔄 شروع مجدد</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="groups-title">
+          <span>👥 پاسخ گروه‌ها</span>
+          <small>✓ درست — ✗ غلط — ⏭️ بی‌پاسخ</small>
+        </div>
+        <div id="groupsList"></div>
+      </div>
+
+      <div class="lb-box">
+        <div class="lb-title"><span>🏆 جدول زنده امتیازات</span></div>
+        <div id="leaderboard"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ نتایج ============ -->
+<section id="resultScreen" class="screen">
+  <div class="result-card">
+    <div class="result-emoji" id="resultEmoji">🏆</div>
+    <h2 class="result-title" id="resultTitle">پایان مأموریت!</h2>
+    <p class="result-msg" id="resultMsg">—</p>
+    <div class="winner-box" id="winnerBox">
+      <div class="wname" id="winnerName">—</div>
+      <div class="wscore" id="winnerScore">۰ امتیاز</div>
+    </div>
+    <div class="lb-box" style="text-align:right">
+      <div class="lb-title"><span>📊 جدول نهایی</span></div>
+      <div id="finalLeaderboard"></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn btn-primary" id="btnPlayAgain">🔄 بازی دوباره</button>
+      <button class="btn btn-neutral" id="btnHome">🏠 بازگشت به صفحه شروع</button>
+    </div>
+    <p class="creator-tag" style="color:#999;margin-top:20px;text-shadow:none">طراحی و توسعه: سمیه زارع</p>
+  </div>
+</section>
+
+<!-- ============ مودال ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="combo" id="combo"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   مأموریت نجات سرزمین کسرها
+   طراحی و توسعه: سمیه زارع
+   نسخه: اجرای زنده کلاسی (تک‌فایلی)
+   اصلاح مهم: عبارت‌های ریاضی چپ‌به‌راست با روش مطمئن
+   ============================================================ */
+
+const $ = (s, c = document) => c.querySelector(s);
+const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+const faNum = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+/* ═══════════════════════════════════════════════════
+   ⭐ سازنده عبارت ریاضی — مطمئن‌ترین روش
+   ─────────────────────────────────────────────────
+   هر عبارت ریاضی را با سازنده M(...) می‌سازیم.
+   این تابع آرایه‌ای از قطعات می‌گیرد و همه را
+   داخل یک <span class="math" dir="ltr"> می‌پیچد.
+   
+   مثال: M(F(6,7), '÷', F(2,7))
+   → یک span.math با dir=ltr حاوی: کسر ۶/۷ ÷ کسر ۲/۷
+   که از چپ به راست خوانده می‌شود.
+   ═══════════════════════════════════════════════════ */
+
+// F = Fraction
+function F(num, den) {
+  return `<span class="frac"><span class="n">${faNum(num)}</span><span class="d">${faNum(den)}</span></span>`;
+}
+
+// M = Math expression (LTR)
+function M(...parts) {
+  const inner = parts.join(' ');
+  return `<span class="math" dir="ltr">${inner}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   بانک سؤال — ۸ سؤال
+   متن‌های فارسی و کسرها به‌صورت HTML آماده‌اند.
+   ═══════════════════════════════════════════════════ */
+const QUESTIONS = [
+  {
+    id: 0, type: 'هم‌مخرج', title: 'قلعه هم‌مخرج‌ها',
+    // "حاصل تقسیم [۶/۷ ÷ ۲/۷] چند است؟"
+    q: `حاصل تقسیم ${M(F(6,7), '÷', F(2,7))} چند است؟`,
+    opts: ['۱', '۲', '۳', '۴'],
+    ans: 2,
+    exp: `چون مخرج‌ها برابرند، صورت‌ها را تقسیم می‌کنیم: ۶ ÷ ۲ = ۳. یعنی سه تا ${M(F(2,7))} در ${M(F(6,7))} هست.`,
+    points: 100
+  },
+  {
+    id: 1, type: 'هم‌مخرج', title: 'قلعه هم‌مخرج‌ها',
+    q: `حاصل ${M(F(9,10), '÷', F(3,10))} کدام است؟`,
+    opts: ['۲', '۳', '۴', '۵'],
+    ans: 1,
+    exp: `مخرج‌ها برابرند؛ ۹ ÷ ۳ = ۳.`,
+    points: 100
+  },
+  {
+    id: 2, type: 'غیرهم‌مخرج', title: 'قلعه غیرهم‌مخرج',
+    q: `حاصل ${M(F(3,4), '÷', F(1,8))} چند است؟`,
+    opts: ['۲', '۴', '۶', '۸'],
+    ans: 2,
+    exp: `ابتدا هم‌مخرج می‌کنیم: ${M(F(3,4), '=', F(6,8))}. سپس ۶ ÷ ۱ = ۶. یعنی شش تا ${M(F(1,8))} در ${M(F(3,4))} هست.`,
+    points: 100
+  },
+  {
+    id: 3, type: 'غیرهم‌مخرج', title: 'قلعه غیرهم‌مخرج',
+    q: `حاصل ${M(F(2,3), '÷', F(1,6))} برابر است با:`,
+    opts: ['۲', '۳', '۴', '۶'],
+    ans: 2,
+    exp: `${M(F(2,3), '=', F(4,6))}. سپس ۴ ÷ ۱ = ۴.`,
+    points: 100
+  },
+  {
+    id: 4, type: 'معکوس', title: 'قلعه معکوس',
+    q: `حاصل ${M(F(4,5), '÷', F(2,3))} کدام است؟`,
+    opts: [M(F(6,5)), M(F(8,15)), M(F(2,5)), M(F(5,6))],
+    ans: 0,
+    exp: `تقسیم = ضرب در معکوس کسر دوم: ${M(F(4,5), '×', F(3,2), '=', F(12,10), '=', F(6,5))}. فقط کسر دوم معکوس می‌شود.`,
+    points: 100
+  },
+  {
+    id: 5, type: 'معکوس', title: 'قلعه معکوس',
+    q: `حاصل ${M(F(5,6), '÷', F(2,3))} برابر است با:`,
+    opts: [M(F(5,4)), M(F(5,9)), M(F(4,5)), M(F(10,18))],
+    ans: 0,
+    exp: `${M(F(5,6), '×', F(3,2), '=', F(15,12), '=', F(5,4))}. توجه: حاصل تقسیم همیشه کوچک‌تر از کسر اول نیست!`,
+    points: 100
+  },
+  {
+    id: 6, type: 'خطایابی', title: 'قلعه کارآگاهان',
+    q: `دوستم برای ${M(F(2,3), '÷', F(4,5))} نوشته: ${M(F(3,2), '×', F(5,4))}. اشتباهش چیست؟`,
+    opts: [
+      'درست نوشته، اشکالی ندارد',
+      `فقط کسر دوم معکوس می‌شود: ${M(F(2,3), '×', F(5,4), '=', F(5,6))}`,
+      'باید هر دو کسر معکوس شوند',
+      'باید مخرج‌ها را برابر کنیم و بعد معکوس کنیم'
+    ],
+    ans: 1,
+    exp: `در تقسیم کسرها، فقط کسر دوم (مقسوم‌علیه) معکوس می‌شود: ${M(F(2,3), '×', F(5,4), '=', F(10,12), '=', F(5,6))}.`,
+    points: 100
+  },
+  {
+    id: 7, type: 'چالش', title: 'چالش نهایی',
+    q: `${M(F(3,4))} لیتر شربت را در لیوان‌های ${M(F(1,8))} لیتری می‌ریزیم. چند لیوان پر می‌شود؟`,
+    opts: ['۳', '۴', '۶', '۸'],
+    ans: 2,
+    exp: `${M(F(3,4), '=', F(6,8))}. پس ۶ ÷ ۱ = ۶ لیوان. (سؤال چالشی: ۲۰۰ امتیاز)`,
+    points: 200
+  }
+];
+
+/* ═══════════════════════════════════════════════════
+   تیم‌ها
+   ═══════════════════════════════════════════════════ */
+const TEAMS = [
+  { id: 'g1', name: 'گروه کاوشگران', emoji: '🔍', color: '#4A90E2' },
+  { id: 'g2', name: 'گروه ریاضی‌دانان', emoji: '📐', color: '#20C997' },
+  { id: 'g3', name: 'گروه نابغه‌ها', emoji: '🧠', color: '#FF922B' },
+  { id: 'g4', name: 'گروه رمزگشا', emoji: '🔓', color: '#A29BFE' },
+  { id: 'g5', name: 'گروه کارآگاهان', emoji: '🕵️', color: '#FD79A8' }
+];
+
+/* ═══════════════════════════════════════════════════
+   وضعیت
+   ═══════════════════════════════════════════════════ */
+const State = {
+  qIndex: -1,
+  timerRunning: false,
+  timerDuration: 30,
+  answersRevealed: false,
+  teams: {},
+  timerStart: 0,
+  timerRAF: null,
+  lastHurrySec: -1,
+  totalAnswered: 0,
+  totalCorrect: 0,
+  startTime: 0,
+  init() {
+    TEAMS.forEach(t => {
+      this.teams[t.id] = { ...t, score: 0, answer: null };
+    });
+  },
+  reset() {
+    TEAMS.forEach(t => { this.teams[t.id] = { ...t, score: 0, answer: null }; });
+    this.qIndex = -1;
+    this.answersRevealed = false;
+    this.timerRunning = false;
+    this.totalAnswered = 0;
+    this.totalCorrect = 0;
+    this.startTime = Date.now();
+  }
+};
+State.init();
+
+/* ═══════════════════════════════════════════════════
+   صدا
+   ═══════════════════════════════════════════════════ */
+class AudioManager {
+  constructor() {
+    this.ctx = null;
+    this.sfxGain = null;
+    this.musicGain = null;
+    this.musicEnabled = true;
+    this.sfxEnabled = true;
+    this.musicPlaying = false;
+    this.musicTimer = null;
+    this.bgmNodes = [];
+  }
+  ensure() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      this.ctx = new AC();
+      this.sfxGain = this.ctx.createGain();
+      this.musicGain = this.ctx.createGain();
+      this.sfxGain.gain.value = 0.4;
+      this.musicGain.gain.value = 0.15;
+      this.sfxGain.connect(this.ctx.destination);
+      this.musicGain.connect(this.ctx.destination);
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{});
+    return true;
+  }
+  tone(freq, dur, type='sine', gain=0.5, when=0) {
+    if (!this.ensure() || !this.sfxEnabled) return;
+    const t = this.ctx.currentTime + when;
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(g); g.connect(this.sfxGain);
+    osc.start(t); osc.stop(t + dur + 0.05);
+  }
+  sfxCorrect() { this.tone(523.25,0.12,'triangle',0.5,0); this.tone(659.25,0.12,'triangle',0.5,0.1); this.tone(783.99,0.2,'triangle',0.5,0.2); }
+  sfxWrong() { this.tone(311.13,0.15,'sawtooth',0.35,0); this.tone(233.08,0.25,'sawtooth',0.35,0.12); }
+  sfxClick() { this.tone(880,0.05,'square',0.2); }
+  sfxTick() { this.tone(1200,0.04,'square',0.15); }
+  sfxHurry() { this.tone(1000,0.06,'square',0.3); }
+  sfxWin() { [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>this.tone(f,0.3,'triangle',0.5,i*0.15)); }
+  sfxStart() { this.tone(440,0.1,'triangle',0.4,0); this.tone(660,0.15,'triangle',0.4,0.1); }
+  startMusic() {
+    if (!this.musicEnabled || this.musicPlaying || !this.ensure()) return;
+    this.musicPlaying = true;
+    const melody = [523.25,587.33,659.25,523.25,587.33,659.25,783.99,659.25,587.33,523.25,493.88,523.25,587.33,659.25,523.25,440];
+    let step = 0;
+    const play = () => {
+      if (!this.musicPlaying || !this.musicEnabled) return;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = melody[step % melody.length];
+      const t = this.ctx.currentTime;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.08, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.connect(g); g.connect(this.musicGain);
+      osc.start(t); osc.stop(t + 0.65);
+      this.bgmNodes.push(osc); step++;
+      this.musicTimer = setTimeout(play, 550);
+    };
+    play();
+  }
+  stopMusic() {
+    this.musicPlaying = false;
+    if (this.musicTimer) clearTimeout(this.musicTimer);
+    this.bgmNodes.forEach(n => { try { n.stop(); } catch(e){} });
+    this.bgmNodes = [];
+  }
+}
+const audio = new AudioManager();
+
+/* ═══════════════════════════════════════════════════
+   ناوبری
+   ═══════════════════════════════════════════════════ */
+function showScreen(id) {
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo({ top: 0 });
+}
+
+/* ═══════════════════════════════════════════════════
+   شروع بازی
+   ═══════════════════════════════════════════════════ */
+$('#btnStart').onclick = () => {
+  audio.ensure();
+  audio.sfxStart();
+  if (audio.musicEnabled) audio.startMusic();
+  State.reset();
+  State.startTime = Date.now();
+  State.qIndex = 0;
+  showScreen('gameScreen');
+  renderGroups();
+  renderLeaderboard();
+  renderQuestion();
+  toast('🎮 مأموریت شروع شد!');
+};
+
+/* ═══════════════════════════════════════════════════
+   رندر سؤال
+   ═══════════════════════════════════════════════════ */
+function renderQuestion() {
+  const q = State.qIndex >= 0 ? QUESTIONS[State.qIndex] : null;
+  const badge = $('#qBadge');
+  const type = $('#qType');
+  const qText = $('#qText');
+  const qOpts = $('#qOpts');
+  const explain = $('#explainBox');
+  $('#qCount').textContent = faNum(State.qIndex + 1) + ' / ۸';
+
+  if (!q) {
+    badge.textContent = 'آماده';
+    type.textContent = '—';
+    qText.textContent = 'برای شروع، روی «سؤال بعدی» کلیک کنید.';
+    qOpts.innerHTML = '';
+    explain.classList.remove('show');
+    return;
+  }
+
+  badge.textContent = `سؤال ${faNum(State.qIndex + 1)} از ۸`;
+  type.textContent = q.type;
+  // q.q قبلاً HTML آماده است (ترکیب متن فارسی + span.math)
+  qText.innerHTML = q.q;
+
+  qOpts.innerHTML = q.opts.map((opt, i) => {
+    let cls = 'q-opt';
+    if (State.answersRevealed && i === q.ans) cls += ' correct';
+    // opt قبلاً HTML آماده است
+    return `<div class="${cls}" data-idx="${i}" role="button" tabindex="0">${opt}</div>`;
+  }).join('');
+
+  $$('#qOpts .q-opt').forEach(el => {
+    const handler = () => {
+      if (State.answersRevealed) return;
+      audio.sfxTick();
+      $$('#qOpts .q-opt').forEach(x => x.classList.remove('picked'));
+      el.classList.add('picked');
+    };
+    el.onclick = handler;
+    el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } };
+  });
+
+  explain.classList.remove('show');
+  if (State.answersRevealed) {
+    explain.classList.add('show');
+    explain.innerHTML = `💡 <b>پاسخ صحیح:</b> ${q.opts[q.ans]}<br><br>${q.exp}`;
+  }
+
+  updateTimerDisplay(State.timerDuration);
+  updateControls();
+}
+
+/* ═══════════════════════════════════════════════════
+   تایمر
+   ═══════════════════════════════════════════════════ */
+function startTimer() {
+  if (State.timerRunning) return;
+  if (State.qIndex < 0) { toast('ابتدا یک سؤال را نمایش دهید.'); return; }
+  if (State.answersRevealed) { toast('پاسخ این سؤال اعلام شده. سؤال بعدی را انتخاب کنید.'); return; }
+
+  State.timerRunning = true;
+  State.timerStart = performance.now();
+  State.lastHurrySec = -1;
+  audio.sfxStart();
+
+  const loop = () => {
+    if (!State.timerRunning) return;
+    const elapsed = (performance.now() - State.timerStart) / 1000;
+    const remaining = Math.max(0, State.timerDuration - elapsed);
+    updateTimerDisplay(remaining);
+
+    const sec = Math.ceil(remaining);
+    if (sec <= 10 && sec > 5 && sec !== State.lastHurrySec) {
+      State.lastHurrySec = sec;
+      audio.sfxTick();
+    }
+    if (sec <= 5 && sec > 0 && sec !== State.lastHurrySec) {
+      State.lastHurrySec = sec;
+      audio.sfxHurry();
+    }
+    if (remaining <= 0) {
+      State.timerRunning = false;
+      audio.sfxHurry();
+      toast('⏰ زمان تمام شد! پاسخ‌ها را اعلام کنید.');
+      updateControls();
+      return;
+    }
+    State.timerRAF = requestAnimationFrame(loop);
+  };
+  State.timerRAF = requestAnimationFrame(loop);
+  updateControls();
+}
+
+function stopTimer() {
+  State.timerRunning = false;
+  if (State.timerRAF) cancelAnimationFrame(State.timerRAF);
+  State.timerRAF = null;
+  updateControls();
+}
+
+function updateTimerDisplay(remaining) {
+  const sec = Math.ceil(remaining);
+  const pct = Math.max(0, Math.min(100, (remaining / State.timerDuration) * 100));
+  const numEl = $('#timerNum');
+  const fillEl = $('#timerFill');
+  if (!numEl || !fillEl) return;
+  numEl.textContent = faNum(sec);
+  numEl.className = 'timer-num' + (sec <= 5 ? ' danger' : sec <= 10 ? ' warn' : '');
+  fillEl.style.width = pct + '%';
+  fillEl.className = 'timer-fill' + (sec <= 5 ? ' danger' : sec <= 10 ? ' warn' : '');
+}
+
+/* ═══════════════════════════════════════════════════
+   گروه‌ها
+   ═══════════════════════════════════════════════════ */
+function renderGroups() {
+  const list = $('#groupsList');
+  if (!list) return;
+  list.innerHTML = TEAMS.map(t => {
+    const team = State.teams[t.id];
+    let cls = 'group-card';
+    if (State.answersRevealed && team.answer !== null) {
+      if (team.answer === 'correct') cls += ' correct';
+      else if (team.answer === 'wrong') cls += ' wrong';
+    }
+    const disabled = State.answersRevealed || State.qIndex < 0;
+    return `
+      <div class="${cls}" style="border-right-color:${t.color}">
+        <span class="group-emoji">${t.emoji}</span>
+        <div>
+          <div class="group-name">${t.name}</div>
+          <div class="group-actions" style="margin-top:4px">
+            <button class="mini-btn mini-ok" data-team="${t.id}" data-ans="correct" ${disabled ? 'disabled' : ''} title="پاسخ درست">✓</button>
+            <button class="mini-btn mini-no" data-team="${t.id}" data-ans="wrong" ${disabled ? 'disabled' : ''} title="پاسخ غلط">✗</button>
+            <button class="mini-btn mini-skip" data-team="${t.id}" data-ans="skip" ${disabled ? 'disabled' : ''} title="بی‌پاسخ">⏭️</button>
+          </div>
+        </div>
+        <div class="group-score">${faNum(team.score)}</div>
+      </div>
+    `;
+  }).join('');
+
+  $$('#groupsList .mini-btn').forEach(btn => {
+    btn.onclick = () => {
+      audio.sfxTick();
+      setTeamAnswer(btn.dataset.team, btn.dataset.ans);
+    };
+  });
+}
+
+function setTeamAnswer(teamId, ans) {
+  if (State.answersRevealed) return;
+  if (State.qIndex < 0) return;
+  State.teams[teamId].answer = ans;
+  renderGroups();
+  toast(`✅ پاسخ ${State.teams[teamId].name} ثبت شد`);
+}
+
+/* ═══════════════════════════════════════════════════
+   اعلام پاسخ
+   ═══════════════════════════════════════════════════ */
+$('#btnReveal').onclick = () => {
+  if (State.qIndex < 0) { toast('ابتدا یک سؤال را نمایش دهید.'); return; }
+  if (State.answersRevealed) { toast('قبلاً اعلام شده.'); return; }
+
+  audio.sfxClick();
+  stopTimer();
+  State.answersRevealed = true;
+
+  const q = QUESTIONS[State.qIndex];
+  let correctCount = 0;
+  let withAnswer = 0;
+
+  Object.keys(State.teams).forEach(id => {
+    const team = State.teams[id];
+    if (team.answer === 'correct') {
+      team.score += q.points;
+      correctCount++;
+    }
+    withAnswer++;
+  });
+
+  State.totalAnswered += withAnswer;
+  State.totalCorrect += correctCount;
+
+  if (correctCount > 0) {
+    audio.sfxWin();
+    showCombo(`🎉 ${faNum(correctCount)} گروه درست پاسخ دادند!`);
+    if (State.qIndex === QUESTIONS.length - 1) celebrate(120);
+    else celebrate(40);
+  } else {
+    audio.sfxWrong();
+    toast('هیچ گروهی پاسخ درست نداد.');
+  }
+
+  renderQuestion();
+  renderGroups();
+  renderLeaderboard();
+  updateControls();
+};
+
+/* ═══════════════════════════════════════════════════
+   سؤال بعدی
+   ═══════════════════════════════════════════════════ */
+$('#btnNext').onclick = () => {
+  audio.sfxClick();
+  if (State.qIndex >= QUESTIONS.length - 1) {
+    showResults();
+    return;
+  }
+  if (!State.answersRevealed && State.qIndex >= 0) {
+    if (!confirm('پاسخ سؤال فعلی اعلام نشده. رد شود؟')) return;
+  }
+  stopTimer();
+  State.qIndex++;
+  State.answersRevealed = false;
+  Object.keys(State.teams).forEach(id => State.teams[id].answer = null);
+  renderQuestion();
+  renderGroups();
+  renderLeaderboard();
+  updateControls();
+  audio.sfxStart();
+};
+
+/* ═══════════════════════════════════════════════════
+   شروع مجدد
+   ═══════════════════════════════════════════════════ */
+$('#btnReset').onclick = () => {
+  if (!confirm('آیا از شروع مجدد بازی مطمئن هستید؟ همه امتیازها صفر می‌شوند.')) return;
+  audio.sfxClick();
+  stopTimer();
+  State.reset();
+  State.qIndex = 0;
+  State.startTime = Date.now();
+  renderQuestion();
+  renderGroups();
+  renderLeaderboard();
+  updateControls();
+  toast('🔄 بازی از نو شروع شد');
+};
+
+/* ═══════════════════════════════════════════════════
+   شروع/توقف زمان
+   ═══════════════════════════════════════════════════ */
+$('#btnTimer').onclick = () => {
+  if (State.timerRunning) {
+    stopTimer();
+    audio.sfxTick();
+  } else {
+    startTimer();
+  }
+};
+
+/* ═══════════════════════════════════════════════════
+   کنترل دکمه‌ها
+   ═══════════════════════════════════════════════════ */
+function updateControls() {
+  const timerBtn = $('#btnTimer');
+  if (!timerBtn) return;
+  if (State.timerRunning) {
+    timerBtn.innerHTML = '⏸️ توقف زمان';
+    timerBtn.className = 'btn btn-warning';
+  } else {
+    timerBtn.innerHTML = '▶️ شروع زمان';
+    timerBtn.className = 'btn btn-primary';
+  }
+  const revealBtn = $('#btnReveal');
+  if (revealBtn) revealBtn.disabled = State.qIndex < 0 || State.answersRevealed;
+  const nextBtn = $('#btnNext');
+  if (nextBtn) nextBtn.innerHTML = State.qIndex >= QUESTIONS.length - 1 ? '🏆 نمایش نتایج' : '➡️ سؤال بعدی';
+}
+
+/* ═══════════════════════════════════════════════════
+   جدول رتبه‌بندی
+   ═══════════════════════════════════════════════════ */
+function renderLeaderboard() {
+  const lb = $('#leaderboard');
+  if (!lb) return;
+  const teams = TEAMS.map(t => State.teams[t.id]).sort((a, b) => b.score - a.score);
+  const medals = ['🥇', '🥈', '🥉', '۴.', '۵.'];
+  lb.innerHTML = teams.map((team, i) => `
+    <div class="lb-row ${i === 0 && team.score > 0 ? 'top' : ''}">
+      <span><span class="lb-pos">${medals[i]}</span><span class="lb-name">${team.emoji} ${team.name}</span></span>
+      <span class="lb-score">${faNum(team.score)}</span>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   صفحه نتایج
+   ═══════════════════════════════════════════════════ */
+function showResults() {
+  stopTimer();
+  const teams = TEAMS.map(t => State.teams[t.id]).sort((a, b) => b.score - a.score);
+  const winner = teams[0];
+  const successPct = State.totalAnswered > 0 ? Math.round((State.totalCorrect / State.totalAnswered) * 100) : 0;
+
+  let rank, emoji, msg;
+  if (successPct >= 80) { rank = 'قهرمانان سرزمین کسرها'; emoji = '🏆'; msg = 'فوق‌العاده! تسلط عالی بر تقسیم کسرها'; }
+  else if (successPct >= 60) { rank = 'کاوشگران موفق'; emoji = '🥇'; msg = 'عالی بود! با کمی تمرین بیشتر، استاد می‌شوید.'; }
+  else if (successPct >= 40) { rank = 'ماجراجویان پرتلاش'; emoji = '🥈'; msg = 'خوب بود! با تمرین بیشتر بهتر می‌شوید.'; }
+  else { rank = 'در حال یادگیری'; emoji = '🌱'; msg = 'هر تلاشی ارزشمند است! دوباره تلاش کنید.'; }
+
+  $('#resultEmoji').textContent = emoji;
+  $('#resultTitle').textContent = rank;
+  $('#resultMsg').textContent = msg;
+
+  const winnerBox = $('#winnerBox');
+  if (winner && winner.score > 0) {
+    winnerBox.style.display = 'block';
+    $('#winnerName').textContent = `🏆 ${winner.emoji} ${winner.name}`;
+    $('#winnerScore').textContent = faNum(winner.score) + ' امتیاز';
+  } else {
+    winnerBox.style.display = 'none';
+  }
+
+  const medals = ['🥇', '🥈', '🥉', '۴.', '۵.'];
+  $('#finalLeaderboard').innerHTML = teams.map((team, i) => `
+    <div class="lb-row ${i === 0 && team.score > 0 ? 'top' : ''}">
+      <span><span class="lb-pos">${medals[i]}</span><span class="lb-name">${team.emoji} ${team.name}</span></span>
+      <span class="lb-score">${faNum(team.score)}</span>
+    </div>
+  `).join('');
+
+  showScreen('resultScreen');
+  audio.sfxWin();
+  celebrate(150);
+}
+
+/* ═══════════════════════════════════════════════════
+   بازی دوباره
+   ═══════════════════════════════════════════════════ */
+$('#btnPlayAgain').onclick = () => {
+  audio.sfxClick();
+  stopTimer();
+  State.reset();
+  State.qIndex = 0;
+  State.startTime = Date.now();
+  showScreen('gameScreen');
+  renderGroups();
+  renderLeaderboard();
+  renderQuestion();
+  updateControls();
+  toast('🔄 بازی جدید شروع شد!');
+};
+
+$('#btnHome').onclick = () => {
+  audio.sfxClick();
+  audio.stopMusic();
+  showScreen('startScreen');
+};
+
+/* ═══════════════════════════════════════════════════
+   تنظیمات
+   ═══════════════════════════════════════════════════ */
+function openModal(html) {
+  $('#modalContent').innerHTML = html;
+  $('#modalOverlay').classList.add('show');
+  const closeBtn = $('#modalContent .close-btn');
+  if (closeBtn) closeBtn.onclick = closeModal;
+}
+function closeModal() {
+  $('#modalOverlay').classList.remove('show');
+}
+$('#modalOverlay').addEventListener('click', e => {
+  if (e.target === $('#modalOverlay')) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+$('#btnSettings').onclick = () => {
+  audio.sfxClick();
+  openModal(`
+    <button class="close-btn" aria-label="بستن">✕</button>
+    <h2>⚙️ تنظیمات</h2>
+    <div class="row">
+      <label>⏱️ زمان هر سؤال</label>
+      <select id="setTime">
+        <option value="20" ${State.timerDuration === 20 ? 'selected' : ''}>۲۰ ثانیه</option>
+        <option value="30" ${State.timerDuration === 30 ? 'selected' : ''}>۳۰ ثانیه</option>
+        <option value="40" ${State.timerDuration === 40 ? 'selected' : ''}>۴۰ ثانیه</option>
+        <option value="60" ${State.timerDuration === 60 ? 'selected' : ''}>۶۰ ثانیه</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>🎵 موسیقی پس‌زمینه</label>
+      <label class="switch">
+        <input type="checkbox" id="setMusic" ${audio.musicEnabled ? 'checked' : ''}>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label>🔊 افکت‌های صوتی</label>
+      <label class="switch">
+        <input type="checkbox" id="setSfx" ${audio.sfxEnabled ? 'checked' : ''}>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label>حجم موسیقی</label>
+      <input type="range" id="setMusicVol" min="0" max="1" step="0.05" value="0.15">
+    </div>
+    <div class="row">
+      <label>حجم افکت‌ها</label>
+      <input type="range" id="setSfxVol" min="0" max="1" step="0.05" value="0.4">
+    </div>
+  `);
+
+  $('#setTime').onchange = e => {
+    State.timerDuration = parseInt(e.target.value, 10);
+    if (!State.timerRunning) updateTimerDisplay(State.timerDuration);
+    toast('زمان سؤال: ' + faNum(State.timerDuration) + ' ثانیه');
+  };
+  $('#setMusic').onchange = e => {
+    audio.musicEnabled = e.target.checked;
+    if (audio.musicEnabled) audio.startMusic();
+    else audio.stopMusic();
+  };
+  $('#setSfx').onchange = e => { audio.sfxEnabled = e.target.checked; };
+  $('#setMusicVol').oninput = e => { if (audio.musicGain) audio.musicGain.gain.value = parseFloat(e.target.value); };
+  $('#setSfxVol').oninput = e => { if (audio.sfxGain) audio.sfxGain.gain.value = parseFloat(e.target.value); };
+};
+
+$('#btnMusic').onclick = () => {
+  audio.musicEnabled = !audio.musicEnabled;
+  if (audio.musicEnabled) audio.startMusic(); else audio.stopMusic();
+  $('#btnMusic').classList.toggle('muted', !audio.musicEnabled);
+  toast(audio.musicEnabled ? '🎵 موسیقی روشن' : '🔇 موسیقی خاموش');
+};
+$('#btnSfx').onclick = () => {
+  audio.sfxEnabled = !audio.sfxEnabled;
+  $('#btnSfx').classList.toggle('muted', !audio.sfxEnabled);
+  toast(audio.sfxEnabled ? '🔊 صدا روشن' : '🔇 صدا خاموش');
+};
+
+/* ═══════════════════════════════════════════════════
+   Toast & Combo & Confetti
+   ═══════════════════════════════════════════════════ */
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function showCombo(text) {
+  const c = $('#combo');
+  c.textContent = text;
+  c.classList.remove('show');
+  void c.offsetWidth;
+  c.classList.add('show');
+}
+
+function celebrate(count = 60) {
+  const colors = ['#FFD43B','#FF922B','#FD79A8','#20C997','#74C0FC','#A29BFE','#FF6B6B'];
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'confetti';
+    d.style.left = Math.random() * 100 + '%';
+    d.style.top = '-20px';
+    d.style.background = colors[Math.floor(Math.random() * colors.length)];
+    d.style.animationDuration = (2 + Math.random() * 2) + 's';
+    d.style.animationDelay = (Math.random() * 0.6) + 's';
+    d.style.width = (6 + Math.random() * 8) + 'px';
+    d.style.height = d.style.width;
+    d.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 5000);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   پاکسازی
+   ═══════════════════════════════════════════════════ */
+window.addEventListener('beforeunload', () => {
+  stopTimer();
+  audio.stopMusic();
+});
+
+/* ═══════════════════════════════════════════════════
+   راه‌اندازی
+   ═══════════════════════════════════════════════════ */
+console.log('🎮 مأموریت نجات سرزمین کسرها — طراحی و توسعه: سمیه زارع');
+</script>
+</body>
+</html>
